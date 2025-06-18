@@ -1,0 +1,143 @@
+{% extends "finmanager/master.html" %}
+
+{% block title %}
+New transaction
+{% endblock %}
+
+{% block scripts %}
+<script>
+	// Перемикає видимість "форми" для 
+	// створення нової категорії
+	function toggleCatForm() {
+		catForm = document.getElementById("catForm");
+    catForm.classList.toggle("d-none");
+	}
+
+	function switchType(type) {
+		switch (type) {
+			case "exp":
+				document.getElementById("catsIncome").style.display = "none";
+				document.getElementById("catsExpense").style.display = "block";
+				break;
+			case "inc":
+				document.getElementById("catsExpense").style.display = "none";
+				document.getElementById("catsIncome").style.display = "block";
+				break;
+		}
+	}
+
+	// Це викликається на старті сторінки, щоб одразу
+	// відобразити прибуток або витрати в категоріях
+	window.addEventListener("load", function () {
+		let type = "{{ isExpense }}";
+		switchType(type);
+	})
+
+</script>
+{% endblock %}
+
+{% block content %}
+<form method="POST" enctype="multipart/form-data" class="p-4 rounded shadow-sm bg-light">
+  {% csrf_token %}
+
+  <!-- Вибір рахунку -->
+  <div class="mb-4">
+    <label class="form-label">Choose account:</label>
+    {% if not accounts %}
+      <p class="text-danger">You don't have an account... <a href="/accounts/new">Create one</a>!</p>
+    {% else %}
+      <div class="d-flex flex-wrap gap-2">
+        {% for acc in accounts %}
+          <input type="radio" class="btn-check" name="account" value="{{ acc.pk }}" id="acc{{acc.pk}}" required
+            {% if isEdit and acc.pk == trans.account.pk %} checked {% endif %}>
+          <label class="btn btn-outline-primary" for="acc{{acc.pk}}">{{ acc.name }}</label>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Сума транзакції -->
+  <div class="mb-4">
+    <label for="tsum" class="form-label">Amount:</label>
+    <input type="number" name="tsum" id="tsum" step="0.01" class="form-control"
+      {% if isEdit %} value="{{ trans.tsum }}" {% endif %} required>
+  </div>
+
+  <!-- Тип транзакції -->
+  <div class="mb-4">
+    <label class="form-label">Transaction type:</label>
+    <div class="d-flex gap-2">
+      <input type="radio" class="btn-check" name="isExpense" value="expense" id="rbExpense" onclick="switchType('exp')"
+        {% if isExpense == 'exp' %} checked {% endif %}>
+      <label class="btn btn-outline-danger" for="rbExpense">Expense</label>
+
+      <input type="radio" class="btn-check" name="isExpense" value="income" id="rbIncome" onclick="switchType('inc')"
+        {% if isExpense == 'inc' %} checked {% endif %}>
+      <label class="btn btn-outline-success" for="rbIncome">Income</label>
+    </div>
+  </div>
+
+  <!-- Категорії -->
+  <div class="mb-4">
+    {% if not categoriesInc and not categoriesExp %}
+      <p class="text-muted">No categories found...</p>
+    {% endif %}
+
+    <!-- Категорії доходів -->
+    <div id="catsIncome" class="mb-2">
+      {% if categoriesInc %}
+        <label class="form-label">Incomes category:</label>
+        <div class="d-flex flex-wrap gap-2">
+          {% for cat in categoriesInc %}
+            <input type="radio" class="btn-check" name="category" value="{{ cat.pk }}" id="catInc{{cat.pk}}" required
+              {% if isEdit and cat.pk == trans.category.pk %} checked {% endif %}>
+            <label class="btn btn-outline-success" for="catInc{{cat.pk}}">{{ cat.title }}</label>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Категорії витрат -->
+    <div id="catsExpense" class="mb-2">
+      {% if categoriesExp %}
+        <label class="form-label">Expenses category:</label>
+        <div class="d-flex flex-wrap gap-2">
+          {% for cat in categoriesExp %}
+            <input type="radio" class="btn-check" name="category" value="{{ cat.pk }}" id="catExp{{cat.pk}}" required
+              {% if isEdit and cat.pk == trans.category.pk %} checked {% endif %}>
+            <label class="btn btn-outline-danger" for="catExp{{cat.pk}}">{{ cat.title }}</label>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Нова категорія -->
+    <div class="form-check mt-3">
+      <input type="radio" class="btn-check" name="category" value="-1" id="newCatOption" onclick="toggleCatForm()">
+      <label class="btn btn-outline-secondary" for="newCatOption">New category</label>
+      <div id="catForm" class="mt-2 d-none">
+        <input type="text" name="newCatName" id="newCatName" class="form-control" placeholder="New category name...">
+      </div>
+    </div>
+  </div>
+
+  <!-- Дата і час -->
+  <div class="mb-4">
+    <label for="tDateTime" class="form-label">Date and time:</label>
+    <input type="datetime-local" name="tDateTime" id="tDateTime" class="form-control" required
+      value="{% if isEdit %}{{ trans.tDateTime|date:'Y-m-d\\TH:i' }}{% else %}{{ currDateTime }}{% endif %}">
+  </div>
+
+  <!-- Коментар -->
+  <div class="mb-4">
+    <label for="comment" class="form-label">Comment (optional):</label>
+    <textarea name="comment" id="comment" class="form-control" placeholder="Short comment..." rows="2"></textarea>
+  </div>
+
+  <div class="text-center">
+    <button type="submit" class="btn btn-success px-4">Submit</button>
+  </div>
+</form>
+
+
+{% endblock %}

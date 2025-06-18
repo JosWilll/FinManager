@@ -1,0 +1,105 @@
+{% extends "finmanager/master.html" %}
+
+{% block title %}
+  Categories
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+function editCategory(id, currentTitle, isExpense) {
+  // Перетворюємо title на текстове поле
+  const titleCell = document.getElementById(`title-${id}`);
+  titleCell.innerHTML = `<input type="text" class="form-control" name="title" id="input-title-${id}" value="${currentTitle}">`;
+
+  // Перетворюємо тип на тумблер (checkbox)
+  const typeCell = document.getElementById(`type-${id}`);
+  typeCell.innerHTML = `
+    <div class="form-check form-switch d-flex justify-content-center">
+      <input class="form-check-input" name="isExpense" type="checkbox" id="input-type-${id}" ${isExpense ? 'checked' : ''}>
+      <label class="form-check-label ms-2" for="input-type-${id}">${isExpense ? 'Expense' : 'Income'}</label>
+    </div>
+  `;
+
+  // Змінюємо кнопку "Edit" на "Confirm"
+  const editBtn = document.getElementById(`edit-btn-${id}`);
+  editBtn.textContent = 'Confirm';
+  editBtn.classList.remove('btn-outline-primary');
+  editBtn.classList.add('btn-success');
+  editBtn.setAttribute('onclick', `confirmCategory(${id})`);
+}
+
+function confirmCategory(id) {
+  const newTitle = document.getElementById(`input-title-${id}`).value;
+  const isExpense = document.getElementById(`input-type-${id}`).checked;
+  const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+  const formData = new FormData();
+  formData.append('title', newTitle);
+  formData.append('type', isExpense);  // Django чекає рядок 'true' або 'false'
+
+  fetch(`/categories/edit/${id}/`, {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': csrfToken
+    },
+    body: formData,
+  })
+  .then(response => {
+    if (!response.ok) throw new Error("Failed to update category");
+    // Після редіректу JSON не буде — тому просто перезавантажимо сторінку
+    location.reload();
+  })
+  .catch(error => {
+    alert("Error updating category: " + error.message);
+  });
+}
+
+</script>
+
+{% endblock %}
+
+{% block content %}
+  <h1>Categories</h1>
+  <p>Manage categories on this page</p>
+  {% if categories %}
+<table class="table table-striped table-bordered table-hover align-middle text-center">
+  <thead class="table-dark">
+    <tr>
+      <th>Title</th>
+      <th>Type</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for c in categories %}
+    <tr id="row-{{ c.pk }}">
+      <td id="title-{{ c.pk }}">{{ c.title }}</td>
+      <td id="type-{{ c.pk }}">
+        <span class="badge {% if c.isExpense %}bg-danger{% else %}bg-success{% endif %}">
+          {% if c.isExpense %}Expense{% else %}Income{% endif %}
+        </span>
+      </td>
+      <td>
+        <button class="btn btn-sm btn-outline-primary me-1" onclick="editCategory({{ c.pk }}, '{{ c.title }}', {{ c.isExpense|yesno:'true,false' }})" id="edit-btn-{{ c.pk }}">Edit</button>
+        <a href="/categories/delete/{{ c.pk }}" class="btn btn-sm btn-outline-danger">Delete</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+
+  {% else %}
+  <p>No categories yet You can always create new one!</p>
+  {% endif %}
+{% endblock %}
+
+{% block right_utilities %}
+  <form action="{% url 'catCreate' %}" method="post">
+    {%csrf_token%}
+    <input class="form-control" type="text" name="title" id="title" required/>
+    <button type="submit" name="type" value="expense" class="btn btn-primary">New expense category</button>
+    <button type="submit" name="type" value="income" class="btn btn-primary">New income category</button>
+  </form>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends "finmanager/master.html" %}
+
+{% block title %}
+  Transactions
+{% endblock %}
+
+{% block content%}
+  <h1>Transactions</h1>
+  <p>Manage transactions here</p>
+
+    {% if latest_transactions %}
+  <table class="table table-hover table-bordered align-middle text-center">
+    <thead class="table-light">
+      <tr>
+        <th>Amount</th>
+        <th>Category</th>
+        <th>Account</th>
+        <th>Date & Time</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for tran in latest_transactions %}
+      <tr>
+        <td>
+          {% if tran.isExpense %}
+            <span class="text-danger">−{{ tran.tsum }}</span>
+          {% else %}
+            <span class="text-success">+{{ tran.tsum }}</span>
+          {% endif %}
+        </td>
+        <td>{{ tran.category.title }}</td>
+        <td>{{ tran.account.name }}</td>
+        <td>{{ tran.tDateTime|date:"H:i d.m" }}</td>
+        <td>
+          <a href="/transactions/edit/{{tran.pk}}" class="btn btn-sm btn-outline-primary me-1">Edit</a>
+          <a href="/transactions/delete/{{tran.pk}}" class="btn btn-sm btn-outline-danger">Delete</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="5" class="text-muted">No recent transactions found.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+
+
+    {% else %}
+      <p>No transactions yet!</p>
+    {% endif %}
+    
+    {%endblock%}
+
+
+    {%block right_utilities%}
+      <form action="{% url 'transCreate' %}" method="get" style="display: inline;">
+        <button type="submit" name="type" value="expense" class="btn btn-primary">-$ new expense</button>
+      </form>
+      
+      <form action="{% url 'transCreate' %}" method="get" style="display: inline;">
+          <button type="submit" name="type" value="income" class="btn btn-primary">+$ new income</button>
+      </form>
+    {%endblock%}

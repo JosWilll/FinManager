@@ -1,0 +1,30 @@
+{% extends "finmanager/master.html" %}
+
+{% block title %}
+  Home
+{% endblock %}
+
+{% block content %}
+  <h1>Finmanager home</h1>
+  <p>Welcome to finmanager web app! Here you can manage your finances by adding transactions to your money accounts.</p>
+  <div class="row">
+    <div class="col-sm list-group">
+      <h4 class="col-sm ">Top expenses</h4>
+      {% for cat, amount in expensesDescending.items %}
+        <li class="list-group-item">
+          <h5 style="float:left;width:50%;">{{cat}}</h5>
+          <h5 style="float:right;width:50%;text-align: right;">{{amount}}</h5>
+        </li>
+      {%endfor%}
+    </div>
+    <div class="col-sm list-group">
+      <h4 class="col-sm ">Top incomes</h4>
+      {% for cat, amount in incomesDescending.items %}
+        <li class="list-group-item">
+          <h5 style="float:left;width:50%;">{{cat}}</h5>
+          <h5 style="float:right;width:50%;text-align: right;">{{amount}}</h5>
+        </li>
+      {%endfor%}
+    </div>
+  </div>
+{%endblock%}
