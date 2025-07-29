@@ -4,7 +4,108 @@
   Transactions
 {% endblock %}
 
-{% block content%}
+{% block scripts %}
+
+<script>
+  
+  function editTrans(pk){
+    
+    // Change tags one by one for editing
+    // Transaction sum tsum
+    let tsumTag = document.getElementById("tsum"+pk);
+
+    // Used later to re-build original html
+    let tsumSymbol = tsumTag.innerText.charAt(0);
+
+    let origTsum = tsumTag.innerText.substring(1);
+    tsumTag.innerHTML = `
+      <form id='form${pk}' method='post' action='transactions/edit/${pk}/'>
+        {% csrf_token %}
+        <div class="input-group mb-3">
+          <input type='text' name='tsum' value="${origTsum}" class="form-control" required>
+        </div>
+      </form>
+    `;
+    
+    // Category
+    let catTag = document.getElementById("cat"+pk);
+    let originalCat = catTag.innerText;
+    let initCatPk = document.getElementById("catInitPk"+pk).innerText;
+    catTag.innerHTML = `
+      <div class="dropdown">
+        <button type="button" data-bs-toggle="dropdown" class="btn btn-select dropdown-toggle form-control" id="categoryDropDown${pk}" >${originalCat}</button>
+        <div class="dropdown-menu dropdown-menu-select" aria-labelledby="categoryDropDown">
+          {% for cat in cats %}
+            <div>
+              <button class="dropdown-item dropdown-radio" onclick="document.getElementById('hiddenCatInput${pk}').value = {{ cat.pk }}; document.getElementById('categoryDropDown${pk}').innerText='{{ cat.title }}';">{{ cat.title }}</button>
+            </div>
+          {% endfor %}
+          <input type="hidden" id="hiddenCatInput${pk}" value="${initCatPk}" name="category" form="form${pk}" required>
+        </div>
+      </div>
+    `;
+
+    // Account
+    let accTag = document.getElementById("acc"+pk);
+    let originalAcc = accTag.innerText;
+    let initAccPk = document.getElementById("accInitPk" + pk).innerText;
+    accTag.innerHTML = `
+      <div class="dropdown">
+        <button type="button" data-bs-toggle="dropdown" class="btn btn-select dropdown-toggle" id="accDropDown${pk}">${originalAcc}</button>
+        <div class="dropdown-menu dropdown-menu-select" aria-labelledby="accDropDown">
+          {% for acc in accs %}
+            <div>
+              <button class="dropdown-item dropdown-radio" onclick="document.getElementById('hiddenAccInput${pk}').value = {{ acc.pk }}; document.getElementById('accDropDown${pk}').innerText='{{ acc.name }}';">{{ acc.name }}</button>
+            </div>
+          {% endfor %}
+          <input type="hidden" id="hiddenAccInput${pk}" value="${initAccPk}" name="account" form=form${pk} required>
+        </div>
+      </div>
+    `;
+
+    // Date and time
+    let dateTag = document.getElementById("datetime"+pk);
+    let originalDate = new Date(dateTag.innerText);
+    let origDateVal = originalDate.toISOString().slice(0,10) + ' ' + originalDate.toISOString().slice(11,16);
+    
+    dateTag.innerHTML = `
+      <input type="datetime-local" name="tDateTime" id="tDateTime" class="form-control" form="form${pk}" value="${origDateVal}" required>
+    `;
+    
+    // Buttons
+    let buttonTag = document.getElementById("actions"+pk);
+    let originalButtons = buttonTag.innerHTML;
+    buttonTag.innerHTML = `
+    <button class='btn btn-sm btn-outline-primary' form='form${pk}'>Confirm</button>
+      <button class='btn btn-sm btn-outline-danger' onclick='rejectEditing("${pk}", "${tsumSymbol}", "${origTsum}", "${originalCat}", "${originalAcc}", "${origDateVal}")'>Reject</button>
+      `;
+    
+  }
+
+  // Restore transaction values
+  function rejectEditing(pk, tsumSymbol, tsum, cat, acc, datetime){
+    let spanClass = tsumSymbol == "-" ? "text-danger" : "text-success";
+
+    document.getElementById("trans"+pk).innerHTML = `
+      <tr id="trans${pk}">
+        <td id= "tsum${pk}">
+          <span class="${spanClass}">${tsumSymbol}${tsum}</span>
+        </td>
+        <td id="cat${pk}">${cat}</td>
+        <td id="acc${pk}">${acc}</td>
+        <td id="datetime${pk}">${datetime}</td>
+        <td id="actions${pk}">
+          <button class="btn btn-sm btn-outline-primary me-1" onclick="editTrans(${pk})">Edit</button>
+          <a href="/transactions/delete/${pk}" class="btn btn-sm btn-outline-danger">Delete</a>
+        </td>
+      </tr>
+    `;
+  }
+</script>
+{% endblock %}
+
+
+{% block content %}
   <h1>Transactions</h1>
   <p>Manage transactions here</p>
 
@@ -21,19 +122,19 @@
     </thead>
     <tbody>
       {% for tran in latest_transactions %}
-      <tr>
-        <td>
+      <tr id="trans{{ tran.pk }}">
+        <td id= "tsum{{ tran.pk }}">
           {% if tran.isExpense %}
-            <span class="text-danger">−{{ tran.tsum }}</span>
+            <span class="text-danger">-{{ tran.tsum }}</span>
           {% else %}
             <span class="text-success">+{{ tran.tsum }}</span>
           {% endif %}
         </td>
-        <td>{{ tran.category.title }}</td>
-        <td>{{ tran.account.name }}</td>
-        <td>{{ tran.tDateTime|date:"H:i d.m" }}</td>
-        <td>
-          <a href="/transactions/edit/{{tran.pk}}" class="btn btn-sm btn-outline-primary me-1">Edit</a>
+        <td id="cat{{ tran.pk }}">{{ tran.category.title }} <p id="catInitPk{{ tran.pk }}" hidden>{{ tran.category.pk }}</p></td>
+        <td id="acc{{ tran.pk }}">{{ tran.account.name }} <p id="accInitPk{{ tran.pk }}" hidden>{{ tran.account.pk }}</p></td>
+        <td id="datetime{{ tran.pk }}">{{ tran.tDateTime|date:"H:i d-m-Y" }}</td>
+        <td id="actions{{ tran.pk }}">
+          <button class="btn btn-sm btn-outline-primary me-1" onclick="editTrans({{ tran.pk }})">Edit</button>
           <a href="/transactions/delete/{{tran.pk}}" class="btn btn-sm btn-outline-danger">Delete</a>
         </td>
       </tr>

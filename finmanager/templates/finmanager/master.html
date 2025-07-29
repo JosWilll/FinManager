@@ -20,6 +20,12 @@
         background-color: #f8f9fa;
         padding: 15px;
         height: 100vh;
+        position: fixed;
+        z-index: 1;
+        top:0;
+        left: 0;
+        overflow-x: hidden;
+        transition: 0.5s;
     }
     .main-content {
         padding: 15px;
@@ -30,6 +36,9 @@
         height: 100vh;
     }
   </style>
+
+<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+<script>eruda.init();</script>
 
   <!--Підключаємо скрипт для малювання графіку
   Цей код видає помилки, бо використання {{змінних}},
@@ -65,12 +74,21 @@
         options: {responsive: true}
       });
     };
+    
+    function showHideNav(){
+      let navbar = document.getElementById("left_nav");
+      let isHidden = navbar.class == "d-none sidebar";
+      navbar.class = isHidden ? "col-md-2 sidebar" : "d-none sidebar";
+      navbar.style.width = isHidden ? "0" : "200px";
+    };
   </script>
 </head>
 <body>
   <div class="container-fluid">
     <div class="row">
-      <nav class="col-md-2 sidebar">
+      <input type="checkbox" id="showhide" onclick="showHideNav()">
+      <label for="showhide">Showhide</label>
+      <nav class="col-md-2 sidebar" id="left_nav">
         {% block left_nav %}
             <h5>Navigation</h5>
             <ul class="nav flex-column">
@@ -82,7 +100,7 @@
         {% endblock %}
       </nav>
     
-      <main class="col-md-8 main-content">
+      <main class="col-md-10 main-content">
         {% block content %}
         {% endblock %}
       </main>

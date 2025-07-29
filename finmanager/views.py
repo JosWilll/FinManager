@@ -90,6 +90,8 @@ def transactions(request):
 
 		context = {
 				"latest_transactions": latest_transactions,
+				"cats": Category.objects.order_by("isExpense"),
+				"accs": Account.objects.all(),
 		}
 		
 		return render(request, "finmanager/transactionsView.html", context)
@@ -133,8 +135,11 @@ def transCreate(request):
 
 				trans.account = Account.objects.get(pk=int(request.POST.get("account")))
 				trans.tsum = Decimal(request.POST.get("tsum"))
-				trans.isExpense = request.POST.get("isExpense") == "expense"
 				trans.category = categoryCurrent
+				trans.isExpense = categoryCurrent.isExpense
+				print(trans.isExpense)
+				print(categoryCurrent.isExpense)
+
 				trans.comment = request.POST.get("comment", "")
 				trans.tDateTime = request.POST.get("tDateTime")
 
@@ -221,3 +226,18 @@ def catDelete(request, pk):
 		cat = get_object_or_404(Category, pk=pk)
 		cat.delete()
 		return redirect("categories")
+
+
+def transferCreate(request):
+	accFrom = request.POST.get("accFrom")
+	accTo = request.POST.get("accTo")
+	amount = request.POST.get("amount")
+	newTransfer = Transfer(
+		accFrom, 
+		accTo,
+		amount
+	)
+	newTransfer.save()
+
+
+	return redirect("accounts")
