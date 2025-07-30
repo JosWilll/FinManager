@@ -1,0 +1,6 @@
+__pycache__/
+.venv
+finmanager-venv
+*.py[cod]
+db.sqlite3
+
