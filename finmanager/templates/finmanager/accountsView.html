@@ -24,18 +24,18 @@
 <h1>Accounts menu</h1>
 <p>Here you can create and edit accounts for managing your money</p>
 
-<div class="d-flex flex-wrap gap-3">
+<div class="d-flex flex-wrap gap-2">
   {%for acc in accounts%}
     {%if not acc.isHidden%}
-      <div class="card text-white bg-info mb-3" style="width: 18rem;">
+      <div class="card text-white bg-info mb-3" style="width: 15rem;">
         <div class="card-header">{{acc.name}}</div>
         <div class="card-body">
-          <h5 class="card-title" style="float:left;width:50%;">{{acc.balance}}</h5>
-          <h5 class="card-title" >
+          <h5 class="card-title" style="float:left;">{{acc.balance}}</h5>
+          <div class="btn-group">
+            <a class="btn btn-primary" href="accounts/edit/{{ acc.pk }}">Edit</a>
+            <a class="btn btn-primary" href="accounts/delete/{{acc.pk}}">Delete</a>
             <a class="btn btn-primary">Transfer</a>
-            <a class="btn btn-primary" style="width:65%;margin-bottom: 2px;" href="accounts/edit/{{ acc.pk }}">Edit</a>
-            <a class="btn btn-primary" style="width:65%;" href="accounts/delete/{{acc.pk}}">Delete</a>
-          </h5>
+          </div>
         </div>
       </div>
     {%endif%}
@@ -44,7 +44,7 @@
   <div id="hiddenAccs" class="d-none">
     {%for acc in accounts%}
     {%if acc.isHidden%}
-      <div class="card text-white bg-secondary mb-3" style="width: 18rem;">
+      <div class="card text-white bg-secondary mb-3" style="width: 17rem;">
         <div class="card-header">{{acc.name}}</div>
         <div class="card-body">
           <h5 class="card-title" style="float:left;width:50%;">{{acc.balance}}</h5>

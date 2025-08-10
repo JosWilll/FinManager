@@ -13,37 +13,26 @@
 	{% endblock %}
 
   <style>
-    body {
-        padding: 20px;
-    }
-    .sidebar {
-        background-color: #f8f9fa;
-        padding: 15px;
-        height: 100vh;
-        position: fixed;
-        z-index: 1;
-        top:0;
-        left: 0;
-        overflow-x: hidden;
-        transition: 0.5s;
-    }
-    .main-content {
-        padding: 15px;
+    .topnav{
+      background-color: #0d6efd;
+      overflow: hidden;
     }
     .utilities {
         background-color: #f1f3f5;
         padding: 15px;
         height: 100vh;
     }
+    .calculator input[type="button"]{
+      border-radius: 5px;
+      width: 100%;
+    }
   </style>
 
-<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-<script>eruda.init();</script>
+  <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+  <script>eruda.init();</script>
 
-  <!--Підключаємо скрипт для малювання графіку
-  Цей код видає помилки, бо використання {{змінних}},
-  які в запиті передає Django, не є коректним у JS -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+
   <script>
     window.onload = function() {
       var expChart = document.getElementById('chartExpContainer').getContext('2d');
@@ -75,32 +64,35 @@
       });
     };
     
-    function showHideNav(){
-      let navbar = document.getElementById("left_nav");
-      let isHidden = navbar.class == "d-none sidebar";
-      navbar.class = isHidden ? "col-md-2 sidebar" : "d-none sidebar";
-      navbar.style.width = isHidden ? "0" : "200px";
-    };
+    // Adds char to calculator input prompt
+    function calcInput(char){
+      let prompt = document.getElementById("prompt");
+      prompt.value += char;
+    }
+
+    // Calculates the result for calc prompt input
+    function calculate(){
+
+    }
   </script>
 </head>
 <body>
   <div class="container-fluid">
     <div class="row">
-      <input type="checkbox" id="showhide" onclick="showHideNav()">
-      <label for="showhide">Showhide</label>
-      <nav class="col-md-2 sidebar" id="left_nav">
-        {% block left_nav %}
-            <h5>Navigation</h5>
-            <ul class="nav flex-column">
-                <li class="nav-item"><a class="nav-link" href="{%url 'index'%}">Home</a></li>
-                <li class="nav-item"><a class="nav-link" href="{%url 'transactions'%}">Transactions</a></li>
-                <li class="nav-item"><a class="nav-link" href="{%url 'categories'%}">Categories</a></li>
-                <li class="nav-item"><a class="nav-link" href="{%url 'accounts'%}">Accounts</a></li>
-            </ul>
+        {% block top_nav %}
+
+      <div id="topnav" class="topnav">
+        <div class="btn-group">
+          <a class="btn btn-primary" href="{%url 'index'%}">Home</a>
+          <a class="btn btn-primary" href="{%url 'transactions'%}">Transactions</a>
+          <a class="btn btn-primary" href="{%url 'categories'%}">Categories</a>
+          <a class="btn btn-primary" href="{%url 'accounts'%}">Accounts</a>
+        </div>
+      </div>
+
         {% endblock %}
-      </nav>
     
-      <main class="col-md-10 main-content">
+      <main class="col-md-10">
         {% block content %}
         {% endblock %}
       </main>
@@ -116,6 +108,40 @@
             <p>Incomes this month: {{totalInc|floatformat:"-2"}}</p>
             <canvas id="chartExpContainer"></canvas>
             <canvas id="chartIncContainer"></canvas>
+            <h6>Calculator</h6>
+            <div>
+              <table class="calculator">
+                <tr>
+                  <td colspan="3"><input type="text" id="prompt"></td>
+                  <td><input type="button" class="btn-primary" value="Hi"></td>
+                </tr>
+                <tr>
+                  <td><input type="button" class="btn-primary" value="1" onclick="calcInput('1')"></td>
+                  <td><input type="button" class="btn-primary" value="2" onclick="calcInput('2')"></td>
+                  <td><input type="button" class="btn-primary" value="3" onclick="calcInput('3')"></td>
+                  <td><input type="button" class="btn-primary" value="/" onclick="calcInput('/')"></td>
+                </tr>
+                <tr>
+                  <td><input type="button" class="btn-primary" value="4" onclick="calcInput('4')"></td>
+                  <td><input type="button" class="btn-primary" value="5" onclick="calcInput('5')"></td>
+                  <td><input type="button" class="btn-primary" value="6" onclick="calcInput('6')"></td>
+                  <td><input type="button" class="btn-primary" value="*" onclick="calcInput('*')"></td>
+                </tr>
+                <tr>
+                  <td><input type="button" class="btn-primary" value="7" onclick="calcInput('7')"></td>
+                  <td><input type="button" class="btn-primary" value="8" onclick="calcInput('8')"></td>
+                  <td><input type="button" class="btn-primary" value="9" onclick="calcInput('9')"></td>
+                  <td><input type="button" class="btn-primary" value="-" onclick="calcInput('-')"></td>
+                </tr>
+                <tr>
+                  <td><input type="button" class="btn-primary" value="0" onclick="calcInput('0')"></td>
+                  <td><input type="button" class="btn-primary" value="." onclick="calcInput('.')"></td>
+                  <td><input type="button" class="btn-primary" value="=" onclick="calculate()"></td>
+                  <td><input type="button" class="btn-primary" value="+" onclick="calcInput('+')"></td>
+                </tr>
+
+              </table>
+            </div>
       </aside>
     </div>
   </div>
