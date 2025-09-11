@@ -72,7 +72,50 @@
 
     // Calculates the result for calc prompt input
     function calculate(){
+      let prompt = document.getElementById("prompt");
 
+      // RegEx to check if calculator prompt has anything 
+      // besides digits or mathematical operators
+      let calcChecker = /[^\d\+\-\*\/]/g;
+      if(calcChecker.test(prompt.value)){
+        alert("Calculator input has wrong characters!");
+        return;
+      }
+
+      // Tokenize prompt to divide into an  
+      // array of operators and operands
+      let tokens = prompt.value.split(/([\+\-\*\/])/);
+
+     // First to check multiplying and division
+      for(let i=0;i<tokens.length;i++){
+        switch(tokens[i]){
+          case '*':
+            tokens[i-1] = Number(tokens[i-1]) * Number(tokens[i+1]);
+            tokens.splice(i, 2);
+            i-=2;
+            break;
+          case '/':
+            tokens[i-1] = Number(tokens[i-1]) / Number(tokens[i+1]);
+            tokens.splice(i, 2);
+            i-=2;
+            break;
+        }
+      }
+      for(let i=0; i<tokens.length;i++){
+        switch(tokens[i]){
+          case '+':
+            tokens[i-1] = Number(tokens[i-1]) + Number(tokens[i+1]);
+            tokens.splice(i, 2);
+            i-=2;
+            break;
+          case '-':
+            tokens[i-1] = Number(tokens[i-1]) - Number(tokens[i+1]);
+            tokens.splice(i,2);
+            i-=2;
+            break;
+        }
+      }
+      prompt.value = tokens[0];
     }
   </script>
 </head>

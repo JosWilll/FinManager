@@ -28,6 +28,15 @@ class Transaction(models.Model):
     checkID = models.ForeignKey(Check, on_delete=models.CASCADE, blank=True, null=True)
     tDateTime = models.DateTimeField("Date of transaction", default=None)
 
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        
+        if self.isExpense:
+            self.account.balance -= self.tsum
+        else:
+            self.account.balance += self.tsum
+        self.account.save()
+
     def delete(self, *args, **kwargs):
         if self.isExpense:
             self.account.balance += self.tsum
