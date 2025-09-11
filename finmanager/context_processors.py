@@ -61,7 +61,7 @@ def countStatsGraph(request):
   
 # Перераховує, скільки наразі грошей є в користувача
 def calculateBalance(request):
-  for acc in Account.objects.all():
+  
   allMoney = 0
   if Account.objects.all().exists():
     allMoney = Account.objects.all().aggregate(Sum('balance'))['balance__sum']
