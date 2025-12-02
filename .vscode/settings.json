@@ -1,0 +1,8 @@
+{
+    "editor.copyWithSyntaxHighlighting": false,
+    "workbench.colorTheme": "Default Dark+",
+    "editor.tabSize": 2,
+    "editor.mouseWheelZoom": true,
+    "workbench.settings.showAISearchToggle": false,
+    "files.autoSave": "onFocusChange"
+}

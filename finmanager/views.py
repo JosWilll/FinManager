@@ -1,19 +1,29 @@
 from django.shortcuts import render
 from django.shortcuts import redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.template import loader
 from django.http import Http404
 from django.db.models import Sum
 from django.shortcuts import get_object_or_404
 
+from rest_framework import status, generics
+from rest_framework.views import APIView
+from rest_framework.response import Response
+
 from datetime import datetime
 
 from .models import *
 from .forms import *
+from .serializers import *
 
 from decimal import Decimal
 
 import json
+
+# Login form
+def login(request):
+	
+	return render(request, "finmanager/login.html")
 
 # Головна сторінка
 def index(request):
@@ -36,15 +46,66 @@ def index(request):
 				'incomesDescending': incDescending,
 		}
 
-		return render(request, "finmanager/index.html", context)
+		#return render(request, "finmanager/index.html", context)
+		return JsonResponse(context, safe=False)
 
 
+class TransactionView(APIView):
+	def get(self, request):
+		transactions = Transaction.objects.all()
+		serializer = TransactionSerializer(transactions, many=True)
+		return Response(serializer.data)
+	
+	def post(self, request):
+		serializer = TransactionSerializer(data=request.data)
+		if serializer.is_valid():
+			serializer.save()
+			return Response(serializer.data, status=status.HTTP_201_CREATED)
+		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AccountView(APIView):
+    def get(self, request):
+      accs = Account.objects.all()
+      serializer = AccountSerializer(accs, many=True)
+      return Response(serializer.data)
+
+    def post(self, request):
+      serializer = AccountSerializer(data=request.data)
+      if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+      return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AccountDeleteView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Account.objects.all()
+    
+    serializer_class = AccountSerializer
+
+
+class CategoryView(APIView):
+	def get(self, request):
+		cats = Category.objects.all()
+		serializer = CategorySerializer(cats, many=True)
+		return Response(serializer.data)
+	
+	def post(self, request):
+		serializer = CategorySerializer(data=request.data)
+		if serializer.is_valid():
+			serializer.save()
+			return Response(serializer.data, status=status.HTTP_201_CREATED)
+		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+"""
 # Accounts: GET
 def accounts(request):
-		context = {
-				"accounts": Account.objects.all()
-		}
-		return render(request, "finmanager/accountsView.html", context)
+ 	#context = {"accounts": Account.objects.all() } 
+	accounts = list(Account.objects.values())
+		#return render(request, "finmanager/accountsView.html", context)
+	return JsonResponse(accounts, safe=False)
 
 # Accounts: POST
 def accCreate(request):
@@ -82,8 +143,9 @@ def accDelete(request, pk):
 		acc = get_object_or_404(Account, pk=pk)
 		acc.delete()
 		return redirect("accounts")
+"""
 
-
+"""
 # Transactions: GET
 def transactions(request):
 		latest_transactions = Transaction.objects.order_by("tDateTime")
@@ -93,8 +155,11 @@ def transactions(request):
 				"cats": Category.objects.order_by("isExpense"),
 				"accs": Account.objects.all(),
 		}
+
+		transactions = list(Transaction.objects.values())
 		
-		return render(request, "finmanager/transactionsView.html", context)
+		#return render(request, "finmanager/transactionsView.html", context)
+		return JsonResponse(transactions, safe=False)
 
 # Transactions: POST
 def transCreate(request):
@@ -189,8 +254,9 @@ def transDelete(request, pk):
 		trans = get_object_or_404(Transaction, pk=pk)
 		trans.delete()
 		return redirect("transactions")
+"""
 
-
+"""
 # Categories GET
 def categories(request):
 		context = {
@@ -226,7 +292,7 @@ def catDelete(request, pk):
 		cat = get_object_or_404(Category, pk=pk)
 		cat.delete()
 		return redirect("categories")
-
+"""
 
 def transferCreate(request):
 	accFrom = request.POST.get("accFrom")
