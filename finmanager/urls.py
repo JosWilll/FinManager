@@ -22,7 +22,11 @@ urlpatterns = [
 
 
     path("transactions/", views.TransactionView.as_view()),
+    path("transactions/<int:pk>", views.TransactionDetailedView.as_view()),
+    path("transactions/<int:pk>/delete", views.TransactionDeleteView.as_view()),
     path("categories/", views.CategoryView.as_view()),
+    path("categories/<int:pk>/delete", views.CategoryDeleteView.as_view()),
+    path("categories/<int:pk>", views.CategoryDetailView.as_view()),
     path("accounts/", views.AccountView.as_view()),
     path("accounts/<int:pk>", views.AccountDeleteView.as_view())
 ]

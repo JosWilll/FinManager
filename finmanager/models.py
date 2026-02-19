@@ -3,7 +3,7 @@ from django.db import models
 # Create your models here.
 
 class Category(models.Model):
-    title = models.CharField(max_length=100, unique=True, primary_key=True)
+    title = models.CharField(max_length=100, unique=True)
     isExpense = models.BooleanField(default=True)
 
 
@@ -25,7 +25,7 @@ class Transaction(models.Model):
     account = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True)
     comment = models.CharField(max_length=100, blank=True, null=True)
     isExpense = models.BooleanField(default=True)
-    checkID = models.ForeignKey(Check, on_delete=models.CASCADE, blank=True, null=True)
+    checkID = models.ForeignKey(Check, on_delete=models.SET_NULL, blank=True, null=True)
     tDateTime = models.DateTimeField("Date of transaction", default=None)
 
     def save(self, *args, **kwargs):

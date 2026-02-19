@@ -64,6 +64,21 @@ class TransactionView(APIView):
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class TransactionDetailedView(APIView):
+	def patch(self, request, pk):
+		editedTran = Transaction.objects.get(pk=pk)
+		serializer = TransactionSerializer(editedTran, request.data, partial=True)
+		if serializer.is_valid():
+			serializer.save()
+			return Response(serializer.data, status=status.HTTP_201_CREATED)
+		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+	
+
+class TransactionDeleteView(generics.DestroyAPIView):
+	queryset = Transaction.objects.all()
+	serializer_class = TransactionSerializer
+
+
 class AccountView(APIView):
     def get(self, request):
       accs = Account.objects.all()
@@ -96,6 +111,28 @@ class CategoryView(APIView):
 			serializer.save()
 			return Response(serializer.data, status=status.HTTP_201_CREATED)
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CategoryDetailView(APIView):
+	def get(self, request, pk):
+		cat = Category.objects.get(pk=pk)
+		serializer = CategorySerializer(cat)
+		return Response(serializer.data)
+
+	
+	def patch(self, request, pk):
+		editedCat = Category.objects.get(pk=pk)
+		serializer = CategorySerializer(editedCat, request.data, partial=True)
+		if serializer.is_valid():
+			serializer.save()
+			return Response(serializer.data, status=status.HTTP_201_CREATED)
+		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class CategoryDeleteView(generics.DestroyAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
 
 
 

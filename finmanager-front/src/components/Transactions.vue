@@ -1,130 +1,201 @@
 <template>
-    <table>
-        <thead>
-            <tr>
-                <th>Date and time</th>
-                <th>Sum</th>
-                <th>Category</th>
-            </tr>
-        </thead>
-        <tbody v-for="t in transactions" :key="t.id">
-            <tr>
-                <th>{{ t.tDateTime }}</th>
-                <th>{{ t.tsum }}</th>
-                <th>{{ t.category }}</th>
-            </tr>
-        </tbody>
-    </table>
+  <h1>Transactions</h1>
+  <table class="table table-hover">
+    <thead style="background-color:#86af49 !important; color:white;">
+      <tr>
+        <th>Date and time</th>
+        <th>Account</th>
+        <th>Category</th>
+        <th>Sum</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-for="(t, index) in transactions" :key="t.id" v-bind:class="(t.isExpense) ? 'table-danger' : 'table-success' ">
+        <td>
+          <span v-if="edit!=t.id">
+            {{ t.tDateTime }}
+          </span>
+          <input v-else type="datetime-local" v-model="tDateTime" />
+        </td>
+        <td>
+          <span v-if="edit!=t.id">
+            {{ accounts.find(a => Number(a.id) === Number(t.account))?.name }}
+          </span>
+          <select v-else v-model="account">
+            <option v-for="acc in accounts" :key="acc.id" :value="acc.id">{{ acc.name }}</option>
+          </select>
+        </td>
+        <td>
+          <span v-if="edit!=t.id">
+            {{ categories.find(c => c.id === t.category)?.title }}
+          </span>
+          <select v-else v-model="category">
+            <option v-for="cat in categories" :key="cat.id" :value="cat.id"> {{ cat.title }}</option>
+          </select>
+        </td>
+        <td>
+          <span v-if="edit!=t.id">
+            {{ t.tsum }}
+          </span>
+          <input v-else type="number" min="0" step="0.01" v-model="tsum"/>
+        </td>
+        <td>
+          <div v-if="edit!=t.id">
+            <button class="btn btn-success" @click="editTranForm(t)">Edit</button>
+            <button class="btn btn-danger" @click="delTran(t.id)">Delete</button>
+          </div>
+          <div v-else>
+            <button class="btn btn-success" @click="editTran(t.id, index)">Save</button>
+            <button class="btn btn-danger" @click="cancelEdit">Cancel</button>
+          </div>
+        </td>
 
-    <modal-form>
-        <template v-slot:head>Create a new transaction</template>
-        <template v-slot:body>
-            <form v-on:submit.prevent="newTran">
-                <div class="form-group">
-                    <label for="tsum">Transaction sum</label>
-                    <input type="text" id="tsum" v-model="tsum">
-                </div>
-                <div class="form-group">
-                    <label for="category">Category</label>
-                    <input type="text" id="category" v-model="category">
-                </div>
-                <div class="form-group">
-                    <label for="account">Account</label>
-                    <input type="text" id="account" v-model="account">
-                </div>
-                <div class="form-group">
-                    <label for="comment">Comment (optional)</label>
-                    <textarea id="comment"></textarea>
-                </div>
-                <div class="form-group"></div>
-                <button type="submit">Confirm</button>
-            </form>
-            <calculator id="calc"/>
-        </template>
-    </modal-form>
+      </tr>
+      <tr class="table-primary" v-if="edit!='new'" @click="cancelEdit();edit='new';tDateTime=getNowTime()">
+        <td colspan="5" >New transaction</td>
+      </tr>
+
+      <tr v-else class="table-primary">
+        <td>
+          <input type="datetime-local" v-model="tDateTime" />
+        </td>
+        <td>
+          <select v-model="account">
+            <option v-for="acc in accounts" :key="acc.id" :value="acc.id">{{ acc.name }}</option>
+          </select>
+        </td>
+        <td>
+          <select v-model="category">
+            <option v-for="cat in categories" :key="cat.id" :value="cat.id"> {{ cat.title }}</option>
+          </select>
+        </td>
+        <td>
+          <input type="number" min="0" step="0.01" v-model="tsum"/>
+        </td>
+        <td>
+          <div>
+            <button class="btn btn-success" @click="newTran()">Save</button>
+            <button class="btn btn-danger" @click="cancelEdit">Cancel</button>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
 </template>
 
 <script>
 import axios from 'axios';
-import ModalForm from './ModalForm.vue';
-import calculator from './calculator.vue';
 
-export default{
-    name: 'Transactions-item',
-    components: {ModalForm, calculator},
-    data() {
-        return{
-            // transactions: [],
-            // cats: [],
-            // accs: [],
-            tsum: '',
-            category: '',
-            account: '',
-            comment: '',
-            isExpense: '',
-            checkID: '',
-            tDateTime: ''
-        }
-    },
-    mounted(){
-        // axios.get(this.$hostname + '/transactions')
-        // .then((res)=> {
-        //     this.transactions = res.data;
-        // })
-        // .catch((err)=>{console.log(err)})
-        
-        // axios.get(this.$hostname + '/categories')
-        // .then((res)=> {
-        //     this.cats = res.data;
-        // })
-        // .catch((err)=>{console.log(err)})
-
-        // axios.get(this.$hostname + '/accounts')
-        // .then((res)=> {
-        //     this.accs = res.data;
-        // })
-        // .catch((err)=>{console.log(err)})
-    },
-    methods: {
-        async newTran(){
-            try{
-                const response = await axios.post(this.$hostname + '/transactions', {
-                    tsum: this.tsum,
-                    category: this.category,
-                    account: this.account,
-                    comment: this.comment,
-                    isExpense: this.isExpense,  // Change to fetch with category type
-                    checkID: this.checkID,
-                    tDateTime: this.tDateTime
-                });
-
-                this.transactions.push(response.data);
-
-                this.tsum = '';
-                this.category = '';
-                this.account = '';
-                this.comment = '';
-                this.isExpense = '';
-                this.checkID = '';
-                this.tDateTime = '';
-
-            
-            } catch(error){
-                console.log(error);
-            }
-        }
+export default {
+  name: 'Transactions-item',
+  props: {
+    transactions: Array,
+    categories: Array,
+    accounts: Array
+  },
+  components: {  },
+  data() {
+    return {
+      edit: null,
+      displayComment: null,
+      tsum: '',
+      category: '',
+      account: '',
+      comment: '',
+      isExpense: '',
+      checkID: null,
+      tDateTime: ''
     }
+  },
+  methods: {
+    getNowTime(){
+      let currTime = new Date();
+      return currTime.toISOString().slice(0,16);
+    },
+    cancelEdit(){
+      this.edit = null
+      this.displayComment = ''
+      this.tsum = ''
+      this.category = ''
+      this.account = ''
+      this.comment = ''
+      this.isExpense = ''
+      this.checkID = null
+      this.tDateTime = ''
+    },
+    editTranForm(tran){
+      this.edit = tran.id;
+      this.tsum = tran.tsum;
+      this.category = tran.category;
+      this.account = tran.account;
+      this.comment = tran.commen;
+      this.checkID = tran.checkID;
+      this.tDateTime = tran.tDateTime;
+    },
+    async newTran() {
+      try {
+        const response = await axios.post(this.$hostname + '/transactions/', {
+          tsum: this.tsum,
+          category: this.category,
+          account: this.account,
+          comment: this.comment,
+          isExpense: this.categories.find(c => c.id === this.category)?.isExpense,
+          checkID: this.checkID,
+          tDateTime: this.tDateTime
+        });
+
+        const newTran = response.data;
+        this.$emit("tNew", newTran);
+
+        this.cancelEdit();
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    async editTran(id, vueID){
+      try{
+        const response = await axios.patch(this.$hostname + '/transactions/' + id, {
+          tsum: this.tsum,
+          category: this.category,
+          account: this.account,
+          checkID: this.checkID,
+          tDateTime: this.tDateTime,
+          comment: this.comment,
+          isExpense: this.categories.find(c => c.id === this.category)?.isExpense
+        });
+
+        this.$emit(response.data, vueID);
+
+      } catch(error){
+        console.log(error);
+      }
+    },
+    async delTran(id){
+      try{
+        await axios.delete(this.$hostname + '/transactions/' + id + '/delete');
+        this.$emit("tDel", id);
+      } catch(error){
+        console.log(error);
+      }
+    },
+    showComment(id){
+      this.displayComment = this.displayComment != id ? id : '';
+    }
+  }
 }
 </script>
 
 <style>
-    .form-group{
-        margin: 1em;
-    }
-    .form-group label{
-        text-align: left;
-    }
-    #calc{
-        display: none;
-    }
+.form-group {
+  margin: 1em;
+}
+
+.form-group label {
+  text-align: left;
+}
+
+#calc {
+  display: none;
+}
 </style>

@@ -15,6 +15,12 @@ class CategorySerializer(serializers.ModelSerializer):
   
   
 class TransactionSerializer(serializers.ModelSerializer):
+  checkID = serializers.PrimaryKeyRelatedField(
+        queryset=Check.objects.all(),
+        required=False,
+        allow_null=True
+    )
+
   class Meta:
     model = Transaction
     fields = ['id', 'tsum', 'category', 'account', 'comment', 'isExpense', 'checkID', 'tDateTime']

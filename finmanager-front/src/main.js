@@ -18,7 +18,7 @@ const router = createRouter({
 });
 
 const app = createApp(App);
-app.config.globalProperties.$hostname = 'http://192.168.0.102:8000';
+app.config.globalProperties.$hostname = 'http://localhost:8000';
 app.use(router);
 
 
