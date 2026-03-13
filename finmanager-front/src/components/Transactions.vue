@@ -30,9 +30,20 @@
           <span v-if="edit!=t.id">
             {{ categories.find(c => c.id === t.category)?.title }}
           </span>
-          <select v-else v-model="category">
-            <option v-for="cat in categories" :key="cat.id" :value="cat.id"> {{ cat.title }}</option>
-          </select>
+          <div v-else>
+            <div style="display: inline;">
+              <input type="radio" name="isExpense" value="expense" v-model="isExpense" checked />
+              <label for="expense">Expense</label>
+              <input type="radio" name="isExpense" value="income" v-model="isExpense" />
+              <label for="income">Income</label>
+            </div>
+            <select v-model="category" v-if="isExpense=='expense'">
+              <option v-for="cat in categories.filter(c => c.isExpense)" :key="cat.id" :value="cat.id">{{ cat.title }}</option>
+            </select>
+            <select v-model="category" v-if="isExpense=='income'">
+              <option v-for="cat in categories.filter(c => !c.isExpense)" :key="cat.id" :value="cat.id">{{ cat.title }}</option>
+            </select>
+          </div>
         </td>
         <td>
           <span v-if="edit!=t.id">
@@ -66,8 +77,17 @@
           </select>
         </td>
         <td>
-          <select v-model="category">
-            <option v-for="cat in categories" :key="cat.id" :value="cat.id"> {{ cat.title }}</option>
+          <div style="display: inline;">
+            <input type="radio" name="isExpense" value="expense" v-model="isExpense" checked />
+            <label for="expense">Expense</label>
+            <input type="radio" name="isExpense" value="income" v-model="isExpense" />
+            <label for="income">Income</label>
+          </div>
+          <select v-model="category" v-if="isExpense=='expense'">
+            <option v-for="cat in categories.filter(c => c.isExpense)" :key="cat.id" :value="cat.id">{{ cat.title }}</option>
+          </select>
+          <select v-model="category" v-if="isExpense=='income'">
+            <option v-for="cat in categories.filter(c => !c.isExpense)" :key="cat.id" :value="cat.id">{{ cat.title }}</option>
           </select>
         </td>
         <td>
@@ -103,7 +123,7 @@ export default {
       category: '',
       account: '',
       comment: '',
-      isExpense: '',
+      isExpense: 'expense',
       checkID: null,
       tDateTime: ''
     }
@@ -120,7 +140,7 @@ export default {
       this.category = ''
       this.account = ''
       this.comment = ''
-      this.isExpense = ''
+      this.isExpense = 'expense'
       this.checkID = null
       this.tDateTime = ''
     },

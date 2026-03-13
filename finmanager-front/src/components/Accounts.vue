@@ -126,7 +126,7 @@
       },
       async accDel(accid){
         try{
-          await axios.delete(this.$hostname + '/accounts/' + accid + '/delete')
+          await axios.delete(this.$hostname + '/accounts/' + accid)
           this.$emit("accDel", accid);
         } catch(error){
           console.log(error);

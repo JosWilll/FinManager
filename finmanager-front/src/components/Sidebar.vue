@@ -11,13 +11,18 @@
             <canvas id="chartExpContainer"></canvas>
             <canvas id="chartIncContainer"></canvas>
             <h6>Calculator</h6>
+            <Calculator/>
+
 
       </aside>
 </template>
 
 <script>
+import Calculator from './calculator.vue';
+
 export default{
     name: 'sidebar-item',
+    components: {Calculator}
 }
 
 </script>
