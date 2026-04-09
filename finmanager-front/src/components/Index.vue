@@ -18,22 +18,14 @@
     </div>
   </div>
 
-  <modal-form>
-    <template v-slot:body> 
-      <form method="POST">
-
-      </form>
-    </template>
-  </modal-form>
 </template>
 
 <script>
 import axios from 'axios';
-import ModalForm from './ModalForm.vue';
 
   export default{
     name: "Index-item",
-    components: {ModalForm},
+    components: {},
     data(){
         return{
           context: [],
